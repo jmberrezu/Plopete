@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event CRUD</title>
+    <!-- Carga de jQuery -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.0.min.js"
+      integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Carga del script de Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Carga del CSS de Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-light">
+    <nav
+      class="navbar bg-dark border-bottom navbar-expand-sm border-bottom-dark sticky-top"
+      data-bs-theme="dark"
+    >
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img
+            src="{{ url_for('static', filename='/img/Plopete_Logo_SinBorde.svg') }}"
+            alt="Logo"
+            width="30"
+            class="d-inline-block align-text-top"
+          />
+          Plopete
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNavDropdown"
+          aria-controls="navbarNavDropdown"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Events</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Suscribe</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+          </ul>
+          <form class="d-flex">
+            {% if current_username %}
+            <div class="d-flex align-items-center">
+              <span class="me-3 text-white"
+                >Welcome, {{ current_username }}!</span
+              >
+              <a
+                class="btn btn-outline-primary me-2"
+                href="{{ url_for('logout') }}"
+                >Logout</a
+              >
+            </div>
+            {% else %}
+            <!-- Mostramos el botón "Login" si el usuario no está autenticado -->
+            <form class="d-flex">
+              <a class="btn btn-outline-primary" href="{{ url_for('login') }}"
+                >Login</a
+              >
+            </form>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-lg border card my-3">
+      <h1 class="display-2 m-3">Event CRUD</h1>
+      <div class="d-grid gap-2">
+        <button
+          type="button"
+          class="btn btn-primary mb-3"
+          data-toggle="modal"
+          data-target="#modalAgregar"
+        >
+          Agregar Evento
+        </button>
+      </div>
+
+      <div class="table-responsive-xl">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Event Name</th>
+              <th scope="col">Organizador</th>
+              <th scope="col">Asistentes</th>
+              <th scope="col">Empresa Beneficiada</th>
+              <th scope="col">Fecha del Evento</th>
+              <th scope="col">Ubicación del Evento</th>
+              <th scope="col">Foto del Evento</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for evento in eventos %}
+            <tr>
+              <td scope="row">{{ evento[0] }}</td>
+              <td>{{ evento[1] }}</td>
+              <td>{{ evento[2] }}</td>
+              <td>{{ evento[3] }}</td>
+              <td>{{ evento[4] }}</td>
+              <td>{{ evento[5] }}</td>
+              <td>{{ evento[6] }}</td>
+              <td>
+                <img
+                  src="data:image/png;base64,{{ evento[7] }}"
+                  class="d-block w-100"
+                  alt="Event Image"
+                  style="width: 88.9px; height: 100px; object-fit: cover"
+                />
+              </td>
+              <td>
+                <div class="d-grid gap-2">
+                  <button
+                    type="button"
+                    class="btn btn btn-outline-success btnEditar"
+                    data-toggle="modal"
+                    data-target="#modalEditar"
+                    data-id="{{ evento[0] }}"
+                    data-imagen="{{ evento[7] }}"
+                  >
+                    Editar
+                  </button>
+                  <a
+                    href="{{ url_for('eliminar_evento', event_id=evento[0]) }}"
+                    class="btn btn-outline-danger"
+                  >
+                    Eliminar
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="modalAgregar"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="modalAgregarLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form action="/" method="post" id="formAgregarEvento">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalAgregarLabel">Agregar Evento</h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="nombre">Nombre del Evento:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombre"
+                  name="nombre"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="organizador">Organizador:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="organizador"
+                  name="organizador"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="asistentes">Asistentes:</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="asistentes"
+                  name="asistentes"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="empresaBeneficiada">Empresa Beneficiada:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="empresaBeneficiada"
+                  name="empresaBeneficiada"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="fechaEvento">Fecha del Evento:</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fechaEvento"
+                  name="fechaEvento"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="ubicacionEvento">Ubicación del Evento:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="ubicacionEvento"
+                  name="ubicacionEvento"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="fotoEvento">Foto del Evento:</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="fotoEvento"
+                  name="fotoEvento"
+                  required
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Cerrar
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                id="btnGuardarEvento"
+              >
+                Agregar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="modalEditar"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="modalEditarLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEditarLabel">Editar Evento</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- Formulario para editar eventos -->
+            <form id="formEditarEvento">
+              <input type="hidden" id="eventoId" name="eventoId" />
+              <div class="form-group">
+                <label for="nombreEdit">Nombre del Evento:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombreEdit"
+                  name="nombreEdit"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="organizadorEdit">Organizador:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="organizadorEdit"
+                  name="organizadorEdit"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="asistentesEdit">Asistentes:</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="asistentesEdit"
+                  name="asistentesEdit"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="empresaBeneficiadaEdit">Empresa Beneficiada:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="empresaBeneficiadaEdit"
+                  name="empresaBeneficiadaEdit"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="fechaEventoEdit">Fecha del Evento:</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fechaEventoEdit"
+                  name="fechaEventoEdit"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="ubicacionEventoEdit">Ubicación del Evento:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="ubicacionEventoEdit"
+                  name="ubicacionEventoEdit"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="fotoEventoEdit">Foto del Evento:</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="fotoEventoEdit"
+                  name="fotoEventoEdit"
+                />
+                <div class="border m-3">
+                  <img
+                    src=""
+                    class="d-block w-100"
+                    alt="Event Image"
+                    id="previewFotoEventoEdit"
+                    style="width: 300px; height: 337px; object-fit: cover"
+                  />
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="btnActualizarEvento"
+            >
+              Actualizar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // JavaScript para manejar los eventos
+      $(document).ready(function () {
+        // Prevent default form submission and use AJAX to submit the form data
+        $("#formAgregarEvento").on("submit", function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          // Serialize the form data
+          var formData = new FormData(this);
+
+          // Send the form data to the server using AJAX
+          $.ajax({
+            url: "/",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function () {
+              // Reload the page after successful form submission
+              location.reload();
+            },
+            error: function () {
+              // Handle error if the form submission fails
+              alert("Error while submitting the form.");
+            },
+          });
+        });
+
+        // Obtener el ID del evento seleccionado para editar
+        $(".btnEditar").on("click", function () {
+          var eventId = $(this).data("id");
+          $("#eventoId").val(eventId);
+
+          // Obtener la información de la imagen en formato Base64
+          var imagenBase64 = $(this).data("imagen");
+
+          // Cargar la imagen en la nueva etiqueta de imagen en el modal de edición
+          if (imagenBase64 !== null) {
+            $("#previewFotoEventoEdit").attr(
+              "src",
+              "data:image/jpeg;base64," + imagenBase64
+            );
+          } else {
+            // Si no hay imagen, mostrar una imagen predeterminada
+            $("#previewFotoEventoEdit").attr(
+              "src",
+              "path/to/default/image.jpg"
+            );
+          }
+
+          // Fetch the event data from the server using AJAX
+          $.ajax({
+            url: "/editar_evento/" + eventId,
+            method: "GET",
+            success: function (response) {
+              var evento = response.evento; // Ensure the server returns the event data as "evento"
+              if (evento) {
+                // Populate the editing modal with the event data
+                $("#nombreEdit").val(evento[1]);
+                $("#organizadorEdit").val(evento[2]);
+                $("#asistentesEdit").val(evento[3]);
+                $("#empresaBeneficiadaEdit").val(evento[4]);
+                $("#fechaEventoEdit").val(evento[5]);
+                $("#ubicacionEventoEdit").val(evento[6]);
+                // Handle the photo data if needed
+                if (evento[7] !== null) {
+                  $("#fotoEventoEdit").attr(
+                    "src",
+                    "data:image/jpeg;base64," + evento[7]
+                  );
+                } else {
+                  // Set a default image if there is no photo
+                  $("#fotoEventoEdit").attr("src", "path/to/default/image.jpg");
+                }
+              } else {
+                alert("Error: Event data not found.");
+              }
+            },
+            error: function () {
+              alert("Error while fetching event data for editing.");
+            },
+          });
+
+          // Show the editing modal
+          $("#modalEditar").modal("show");
+        });
+
+        // Código para actualizar el evento
+        $("#btnActualizarEvento").on("click", function () {
+          var eventId = $("#eventoId").val();
+
+          // Obtener los datos del formulario de edición
+          var nombre = $("#nombreEdit").val();
+          var organizador = $("#organizadorEdit").val();
+          var asistentes = $("#asistentesEdit").val();
+          var empresaBeneficiada = $("#empresaBeneficiadaEdit").val();
+          var fechaEvento = $("#fechaEventoEdit").val();
+          var ubicacionEvento = $("#ubicacionEventoEdit").val();
+          // Obtener la foto del evento (si se ha seleccionado una nueva)
+          var fotoEvento = $("#fotoEventoEdit").prop("files")[0];
+
+          // Crear un objeto FormData y agregar los datos del formulario
+          var formData = new FormData();
+          formData.append("nombreEdit", nombre);
+          formData.append("organizadorEdit", organizador);
+          formData.append("asistentesEdit", asistentes);
+          formData.append("empresaBeneficiadaEdit", empresaBeneficiada);
+          formData.append("fechaEventoEdit", fechaEvento);
+          formData.append("ubicacionEventoEdit", ubicacionEvento);
+          formData.append("fotoEventoEdit", fotoEvento); // Agregar la foto del evento (si se ha seleccionado una nueva)
+
+          // Enviar los datos actualizados al servidor utilizando AJAX
+          $.ajax({
+            url: "/editar_evento/" + eventId,
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function () {
+              // Recargar la página después de una actualización exitosa
+              location.reload();
+            },
+            error: function () {
+              alert("Error al actualizar el evento.");
+            },
+          });
+
+          // Cerrar el modal de edición
+          $("#modalEditar").modal("hide");
+        });
+        // Handle modal events to remove backdrop manually
+        $("#modalAgregar, #modalEditar").on("hidden.bs.modal", function () {
+          $(".modal-backdrop").remove();
+        });
+      });
+    </script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

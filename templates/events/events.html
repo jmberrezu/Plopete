@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="blue">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Events</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-light">
+    <nav
+      class="navbar bg-dark border-bottom navbar-expand-sm border-bottom-dark sticky-top"
+      data-bs-theme="dark"
+    >
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img
+            src="{{ url_for('static', filename='/img/Plopete_Logo_SinBorde.svg') }}"
+            alt="Logo"
+            width="30"
+            class="d-inline-block align-text-top"
+          />
+          Plopete
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNavDropdown"
+          aria-controls="navbarNavDropdown"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Events</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Suscribe</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+          </ul>
+          <form class="d-flex">
+            {% if current_username %}
+            <div class="d-flex align-items-center">
+              <span class="me-3 text-white"
+                >Welcome, {{ current_username }}!</span
+              >
+              <a
+                class="btn btn-outline-primary me-2"
+                href="{{ url_for('logout') }}"
+                >Logout</a
+              >
+            </div>
+            {% else %}
+            <!-- Mostramos el botón "Login" si el usuario no está autenticado -->
+            <form class="d-flex">
+              <a class="btn btn-outline-primary" href="{{ url_for('login') }}"
+                >Login</a
+              >
+            </form>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-xl my-4 card p-4" style="text-align: justify">
+      <h1 class="display-2 m-3">Upcoming Events 📆</h1>
+      <div class="row">
+        <p class="col p-3">
+          Join us in making a difference at Plopete. Discover a world of
+          upcoming events that not only bring joy and excitement, but also
+          create a positive impact on the lives of those in need. Our platform
+          is dedicated to connecting generous people like you with diverse
+          nonprofits and foundations that host amazing events.
+        </p>
+        <p class="col p-3">
+          Experience the power of giving back by attending these charitable
+          events, thoughtfully organized by reputable NGOs and foundations. From
+          charity runs and community cleanups to art auctions and educational
+          workshops, there is something for everyone to contribute their time,
+          skills and resources.
+        </p>
+      </div>
+
+      <p class="p-3">
+        At Plopete, we believe that every act of giving counts. By participating
+        in these events, you will have the opportunity to directly impact the
+        lives of those less fortunate. Whether it's donating clothes, books,
+        toys or any other useful items, your contributions will go a long way to
+        help people and communities in need.
+      </p>
+    </div>
+
+    <div class="container-fluid my-3">
+      <div class="row row-cols-1 row-cols-xl-2 g-3">
+        {% for event in events_data %}
+        <div class="col">
+          <div class="card">
+            <div class="row g-0">
+              <div class="col-md-6">
+                <img
+                  src="data:image/jpeg;base64,{{ event.event_photo }}"
+                  class="d-block w-100"
+                  alt="Event Image"
+                  style="width: 300px; height: 337px; object-fit: cover"
+                />
+              </div>
+              <div class="col m-4">
+                <div class="card-body">
+                  <h4 class="card-title fw-bold">{{ event.name }}</h4>
+                </div>
+                <div class="card-text">
+                  <div class="row mb-1">
+                    <label for="Organizer" class="col-sm-4">
+                      <h6>Organizer:</h6>
+                    </label>
+                    <div class="col-sm-8 bg-light py-1">
+                      <p class="m-0" id="Organizer">{{ event.organizer }}</p>
+                    </div>
+                  </div>
+                  <div class="row mb-1">
+                    <label for="Attendees" class="col-sm-4">
+                      <h6>Attendees:</h6>
+                    </label>
+                    <div class="col-sm-8 bg-light">
+                      <!-- Update the ID attribute to include event ID -->
+                      <p class="m-0" id="Attendees{{ event.id }}">
+                        {{ event.attendees }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="row mb-1">
+                    <label for="Benefiting" class="col-sm-4">
+                      <h6>Benefiting:</h6>
+                    </label>
+                    <div class="col-sm-8 bg-light">
+                      <p class="m-0" id="Benefiting">
+                        {{ event.benefiting_company }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="row mb-1">
+                    <label for="When" class="col-sm-4">
+                      <h6>When:</h6>
+                    </label>
+                    <div class="col-sm-8 bg-light">
+                      <p class="m-0" id="When">{{ event.event_date }}</p>
+                    </div>
+                  </div>
+                  <div class="row mb-1">
+                    <label for="Where" class="col-sm-4">
+                      <h6>Where:</h6>
+                    </label>
+                    <div class="col-sm-8 bg-light">
+                      <p class="m-0" id="Where">{{ event.event_location }}</p>
+                    </div>
+                  </div>
+
+                  <div class="row text-center mt-2 gy-2">
+                    <div class="d-grid gap-2 d-sm-block">
+                      <button
+                        class="btn btn-primary"
+                        type="button"
+                        onclick="addToCalendar('{{ event.name }}', '{{ event.event_date }}', '{{ event.event_location }}')"
+                      >
+                        Add to Calendar
+                      </button>
+                      {% if current_username %}
+                      <button
+                        class="btn btn-outline-primary imGoingBtn"
+                        type="button"
+                        data-event-id="{{ event.id }}"
+                      >
+                        I'm Going
+                      </button>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const imGoingButtons = document.querySelectorAll(".imGoingBtn");
+
+        imGoingButtons.forEach((button) => {
+          const eventId = button.dataset.eventId;
+          button.addEventListener("click", () => {
+            toggleAttendees(eventId, button);
+          });
+        });
+
+        function toggleAttendees(eventId, button) {
+          if (button.innerText === `I'm Going`) {
+            fetch(`/increment_attendees/${eventId}`, { method: "POST" })
+              .then((response) => response.json())
+              .then((data) => {
+                updateButtonAndCount(eventId, data.attendees, button);
+              })
+              .catch((error) => console.error("Error:", error));
+          } else {
+            fetch(`/decrement_attendees/${eventId}`, { method: "POST" })
+              .then((response) => response.json())
+              .then((data) => {
+                updateButtonAndCount(eventId, data.attendees, button);
+              })
+              .catch((error) => console.error("Error:", error));
+          }
+        }
+
+        function updateButtonAndCount(eventId, newAttendees, button) {
+          const attendeesElement = document.getElementById(
+            `Attendees${eventId}`
+          );
+          attendeesElement.innerText = newAttendees;
+
+          // Modificamos la lógica para que siempre cambie de estado
+          if (button.innerText === `I'm Going`) {
+            button.innerText = `I'm Not Going`;
+            button.classList.remove("btn-outline-primary");
+            button.classList.add("btn-outline-danger");
+          } else {
+            button.innerText = `I'm Going`;
+            button.classList.remove("btn-outline-danger");
+            button.classList.add("btn-outline-primary");
+          }
+        }
+      });
+
+      function addToCalendar(eventName, eventDate, eventLocation) {
+        const startDate = new Date(eventDate);
+        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Event duration set to 1 hour (you can adjust this if needed)
+
+        const icsFileContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Calendar//EN
+BEGIN:VEVENT
+UID:${Math.random().toString(36).substring(7)}@example.com
+DTSTAMP:${new Date().toISOString().replace(/-|:|\.\d+/g, "")}
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${eventName}
+LOCATION:${eventLocation}
+DESCRIPTION:Join us for the event "${eventName}" at ${eventLocation}.
+END:VEVENT
+END:VCALENDAR`;
+
+        const icsBlob = new Blob([icsFileContent], { type: "text/calendar" });
+        const icsBlobUrl = URL.createObjectURL(icsBlob);
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = icsBlobUrl;
+        downloadLink.download = `${eventName}.ics`;
+        downloadLink.click();
+
+        // Clean up the URL object to release resources
+        URL.revokeObjectURL(icsBlobUrl);
+      }
+
+      function formatDate(date) {
+        return (
+          date
+            .toISOString()
+            .replace(/-|:|\.\d+/g, "")
+            .slice(0, -4) + "00"
+        ); // Adjust the format to include the time zone
+      }
+    </script>
+  </body>
+</html>
